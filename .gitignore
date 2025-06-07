@@ -1,5 +1,6 @@
 # Python
-__pycache__/
+.idea/ # PyCharmの名残.
+__pycache__/ # Pythonのキャッシュファイル.
 *.py[cod]
 *.so
 *.egg
