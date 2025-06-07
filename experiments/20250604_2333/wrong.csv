@@ -1,0 +1,3 @@
+path,true,pred,correct
+../data/val\clip\S__16482323_0.jpg,clip,magnet_clip_big,False
+../data/val\hook_ring\S__16482358_0.jpg,hook_ring,ring,False

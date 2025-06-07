@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# 仮想環境
+.venv/
+env/
+ENV/
+
+# Jupyter関連（使っていなければ不要）
+.ipynb_checkpoints/
+
+# VSCode
+.vscode/
+
+# OS依存ファイル
+.DS_Store
+Thumbs.db
+
+# 環境ファイル（例: .envにAPIキーなどを書く場合）
+.env
