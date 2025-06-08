@@ -9,6 +9,8 @@
 # 日付＋時刻が自動で先頭に付けられます（例: 20250604_2338_light_normal）。
 # また、実行時の設定や使用クラスを記録した config.txt が実験フォルダに保存され、
 # 誤分類された画像は misclassified_images/ フォルダにコピー保存されます。
+# 使用するモデルは ../experiments_train/ 以下の最新の resnet18.pth を自動で読み込み、
+# その学習条件（train_config.txt）も config.txt に記録されます。
 
 import torch
 from torchvision import models, transforms
@@ -18,16 +20,25 @@ import sys
 import argparse
 import csv
 from datetime import datetime
-import shutil  # ← 誤分類画像コピー用
+import shutil
 
 # --- クラス名を ../data/train から取得 ---
 train_dir = "../data/train"
 classes = sorted(os.listdir(train_dir))
 
+# --- 最新の学習モデルを取得 ---
+train_exp_dir = "../experiments_train"
+subdirs = [
+    d for d in os.listdir(train_exp_dir)
+    if os.path.isdir(os.path.join(train_exp_dir, d)) and d[:8].isdigit()
+]
+latest_train_dir = sorted(subdirs)[-1]
+model_path = os.path.join(train_exp_dir, latest_train_dir, "resnet18.pth")
+
 # --- モデル準備 ---
 model = models.resnet18(pretrained=False)
 model.fc = torch.nn.Linear(model.fc.in_features, len(classes))
-model.load_state_dict(torch.load("../models/resnet18.pth", map_location="cpu"))
+model.load_state_dict(torch.load(model_path, map_location="cpu"))
 model.eval()
 
 # --- 前処理 ---
@@ -88,7 +99,6 @@ for root, _, files in os.walk(args.folder):
                 correct += 1
 
             if not is_correct:
-                # --- 誤分類画像を misclassified_images/ にコピー ---
                 dst_path = os.path.join(misclassified_dir, os.path.basename(img_path))
                 shutil.copy2(img_path, dst_path)
 
@@ -108,43 +118,42 @@ for r in results:
 
 # --- 統計 ---
 accuracy = 100 * correct / total if total else 0
-print(f"\n🎯 正解数: {correct}/{total}（正解率: {accuracy:.2f}%）")
+print(f"\n🎯 正解数: {correct}/{total} (正解率: {accuracy:.2f}%)")
 
 # --- config.txt を保存 ---
 config_path = os.path.join(exp_dir, "config.txt")
 with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"日時: {timestamp}\n")
-    cfg.write(f"正解数: {correct}/{total}（正解率: {accuracy:.2f}%）\n")
+    cfg.write(f"正解数: {correct}/{total} (正解率: {accuracy:.2f}%)\n")
     cfg.write(f"推論対象: {args.folder}\n")
     cfg.write(f"フィルタ: {'誤分類のみ' if args.filter == 'wrong' else '全件'}\n")
     cfg.write(f"CSVファイル名: {args.csv}\n")
-    # --- 使用クラスと画像数の記録 ---
-    cfg.write("使用クラス(学習数, 推論数):\n")
+    cfg.write(" 使用クラス(推論画像枚数):\n")
     for cls in classes:
-        # 学習データ数
-        train_path = os.path.join("../data/train", cls)
-        train_count = len([
-            f for f in os.listdir(train_path)
-            if os.path.isfile(os.path.join(train_path, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
-        ]) if os.path.exists(train_path) else 0
-
-        # 推論データ数
         predict_path = os.path.join(args.folder, cls)
         predict_count = len([
             f for f in os.listdir(predict_path)
             if os.path.isfile(os.path.join(predict_path, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
         ]) if os.path.exists(predict_path) else 0
 
-        cfg.write(f" - {cls}（{train_count}, {predict_count}）\n")
+        cfg.write(f" - {cls} ({predict_count})\n")
 
-    # --- 撮影条件（config/shooting.txt）を追記 ---
     shooting_path = os.path.join("..", "config", "shooting.txt")
     if os.path.exists(shooting_path):
         cfg.write("\n撮影条件:\n")
         with open(shooting_path, "r", encoding="utf-8") as shoot:
-            cfg.write(shoot.read())
+            cfg.write(f"{shoot.read()}\n")
     else:
-        cfg.write("\n撮影条件: shooting.txt が見つかりませんでした\n")
+        cfg.write("\n撮影条件: shooting.txt が見つかりません\n")
+
+    # --- 使用モデルの学習条件 ---
+    train_config_path = os.path.join(train_exp_dir, latest_train_dir, "train_config.txt")
+    if os.path.exists(train_config_path):
+        cfg.write("\n使用モデルの学習条件:\n")
+        with open(train_config_path, "r", encoding="utf-8") as f:
+            cfg.write(f.read())
+    else:
+        cfg.write("\n使用モデルの学習条件: train_config.txt が見つかりません\n")
 
 # --- CSV保存 ---
 output_path = os.path.join(exp_dir, args.csv)
