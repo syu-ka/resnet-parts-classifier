@@ -48,11 +48,9 @@ transform = transforms.Compose([
 ])
 
 # --- 引数処理 ---
-parser = argparse.ArgumentParser(description="画像分類の結果を表示・CSV出力")
-parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス")
-parser.add_argument("--filter", choices=["wrong"], help="誤分類のみ表示")
-parser.add_argument("--csv", default="result.csv", help="保存するCSVファイル名（例: result.csv）")
-parser.add_argument("--experiment", help="保存先 experiments/ のサブフォルダ名（例: 20240603_light_normal）")
+parser = argparse.ArgumentParser(description="画像分類の結果を表示・CSV出力（全件 + 誤分類）")
+parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス（省略可）")
+parser.add_argument("--expname", help="保存先 experiments/ のサブフォルダ名（接尾辞）例: debug_lighting")
 args = parser.parse_args()
 
 # --- 入力フォルダ確認 ---
@@ -62,8 +60,8 @@ if not os.path.exists(args.folder) or not os.path.isdir(args.folder):
 
 # --- 実験フォルダ名の決定 ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-if args.experiment:
-    exp_name = f"{timestamp}_{args.experiment}"
+if args.expname:
+    exp_name = f"{timestamp}_{args.expname}"
 else:
     exp_name = timestamp
 
@@ -111,8 +109,6 @@ for root, _, files in os.walk(args.folder):
 
 # --- 表示 ---
 for r in results:
-    if args.filter == "wrong" and r["correct"]:
-        continue
     mark = "✅" if r["correct"] else "❌"
     print(f"{mark} {r['path']} | 正解: {r['true']} | 予測: {r['pred']}")
 
@@ -126,8 +122,9 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"日時: {timestamp}\n")
     cfg.write(f"正解数: {correct}/{total} (正解率: {accuracy:.2f}%)\n")
     cfg.write(f"推論対象: {args.folder}\n")
-    cfg.write(f"フィルタ: {'誤分類のみ' if args.filter == 'wrong' else '全件'}\n")
-    cfg.write(f"CSVファイル名: {args.csv}\n")
+    cfg.write("出力ファイル:\n")
+    cfg.write(" - result_all.csv（全件）\n")
+    cfg.write(" - result_wrong.csv（誤分類）\n")
     cfg.write(" 使用クラス(推論画像枚数):\n")
     for cls in classes:
         predict_path = os.path.join(args.folder, cls)
@@ -155,14 +152,21 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     else:
         cfg.write("\n使用モデルの学習条件: train_config.txt が見つかりません\n")
 
-# --- CSV保存 ---
-output_path = os.path.join(exp_dir, args.csv)
-with open(output_path, "w", newline="", encoding="utf-8") as f:
+# --- CSV（全件）保存 ---
+output_all = os.path.join(exp_dir, "result_all.csv")
+with open(output_all, "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
     writer.writeheader()
     for r in results:
-        if args.filter == "wrong" and r["correct"]:
-            continue
         writer.writerow(r)
 
-print(f"📁 CSV出力完了: {output_path}")
+# --- CSV（誤分類のみ）保存 ---
+output_wrong = os.path.join(exp_dir, "result_wrong.csv")
+with open(output_wrong, "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
+    writer.writeheader()
+    for r in results:
+        if not r["correct"]:
+            writer.writerow(r)
+
+print(f"📁 CSV出力完了: {output_all}, {output_wrong}")
