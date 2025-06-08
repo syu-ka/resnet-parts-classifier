@@ -17,15 +17,17 @@ parser.add_argument("--seed", type=int, help="乱数シードを指定（例: --
 args = parser.parse_args()
 
 # --- 乱数シードの設定（オプション） ---
-# シードを指定した場合、再現性のために乱数を固定します。
 if args.seed is not None:
     print(f"🔒 乱数シードを {args.seed} に固定します")
-    random.seed(args.seed)
-    np.random.seed(args.seed)
-    torch.manual_seed(args.seed)
-    torch.cuda.manual_seed(args.seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+else :
+    args.seed = random.randint(0, 999999)
+    print(f"🔄 シードが指定されていないため、ランダムに {args.seed} を使用します")
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed(args.seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 # --- パス設定 ---
 train_dir = "../data/train"
