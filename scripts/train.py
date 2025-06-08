@@ -7,6 +7,25 @@ from torchvision import datasets, models
 from torch import nn, optim
 import os
 from datetime import datetime
+import random
+import numpy as np
+import argparse
+
+# --- 引数処理 ---
+parser = argparse.ArgumentParser(description="ResNet18 の学習スクリプト")
+parser.add_argument("--seed", type=int, help="乱数シードを指定（例: --seed 42）")
+args = parser.parse_args()
+
+# --- 乱数シードの設定（オプション） ---
+# シードを指定した場合、再現性のために乱数を固定します。
+if args.seed is not None:
+    print(f"🔒 乱数シードを {args.seed} に固定します")
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 # --- パス設定 ---
 train_dir = "../data/train"
@@ -90,6 +109,8 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"エポック数: {num_epochs}\n")
     cfg.write(f"最適化手法: Adam (lr=0.001)\n")
     cfg.write(f"損失関数: CrossEntropyLoss\n")
+    if args.seed is not None:
+        cfg.write(f"シード: {args.seed}\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
     for cls in classes:
         cls_dir = os.path.join(train_dir, cls)
