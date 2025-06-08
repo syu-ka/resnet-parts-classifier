@@ -116,9 +116,24 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"推論対象: {args.folder}\n")
     cfg.write(f"フィルタ: {'誤分類のみ' if args.filter == 'wrong' else '全件'}\n")
     cfg.write(f"CSVファイル名: {args.csv}\n")
-    cfg.write("使用クラス:\n")
+    # --- 使用クラスと画像数の記録 ---
+    cfg.write("使用クラス(学習数, 推論数):\n")
     for cls in classes:
-        cfg.write(f" - {cls}\n")
+        # 学習データ数
+        train_path = os.path.join("../data/train", cls)
+        train_count = len([
+            f for f in os.listdir(train_path)
+            if os.path.isfile(os.path.join(train_path, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
+        ]) if os.path.exists(train_path) else 0
+
+        # 推論データ数
+        predict_path = os.path.join(args.folder, cls)
+        predict_count = len([
+            f for f in os.listdir(predict_path)
+            if os.path.isfile(os.path.join(predict_path, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
+        ]) if os.path.exists(predict_path) else 0
+
+        cfg.write(f" - {cls}（{train_count}, {predict_count}）\n")
 
     # --- 撮影条件（config/shooting.txt）を追記 ---
     shooting_path = os.path.join("..", "config", "shooting.txt")
