@@ -104,6 +104,20 @@ for epoch in range(num_epochs):
 torch.save(model.state_dict(), model_output_path)
 print(f"✅ モデル保存完了: {model_output_path}")
 
+# --- train_images.txt に学習画像のパスを記録 ---
+image_list_path = os.path.join(exp_dir, "train_images.txt")
+with open(image_list_path, "w", encoding="utf-8") as imglist:
+    for cls in classes:
+        cls_dir = os.path.join(train_dir, cls)
+        image_files = sorted([
+            f for f in os.listdir(cls_dir)
+            if os.path.isfile(os.path.join(cls_dir, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
+        ])
+        for f in image_files:
+            # 相対パスとして記録（例: clip/S__12345.jpg）
+            imglist.write(f"{cls}/{f}\n")
+
+
 # --- train_config.txt に設定を記録 ---
 config_path = os.path.join(exp_dir, "train_config.txt")
 with open(config_path, "w", encoding="utf-8") as cfg:
@@ -112,6 +126,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"最適化手法: Adam (lr=0.001)\n")
     cfg.write(f"損失関数: CrossEntropyLoss\n")
     cfg.write(f"シード: {args.seed}\n")
+    cfg.write(f"画像ファイル一覧: train_images.txt に記録済み\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
     for cls in classes:
         cls_dir = os.path.join(train_dir, cls)
