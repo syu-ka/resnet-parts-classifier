@@ -111,8 +111,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"エポック数: {num_epochs}\n")
     cfg.write(f"最適化手法: Adam (lr=0.001)\n")
     cfg.write(f"損失関数: CrossEntropyLoss\n")
-    if args.seed is not None:
-        cfg.write(f"シード: {args.seed}\n")
+    cfg.write(f"シード: {args.seed}\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
     for cls in classes:
         cls_dir = os.path.join(train_dir, cls)
