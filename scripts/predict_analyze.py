@@ -1,4 +1,5 @@
-# このスクリプトは、指定フォルダ以下の画像に対して画像分類モデルを用いて推論を行い、
+# このスクリプトは、指定フォルダ（未記入だと../data/val）以下の画像に対して
+# 画像分類モデルを用いて推論を行い、
 # 各画像の正解ラベル（フォルダ名）と予測ラベルを比較して結果を出力します。
 # 全件表示・誤分類のみ表示・CSV出力に対応しており、学習条件や撮影条件が異なる実験ごとに
 # 結果を整理して保存できるよう、--experiment オプションにより experiments/ 以下に
@@ -36,7 +37,7 @@ transform = transforms.Compose([
 
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="画像分類の結果を表示・CSV出力")
-parser.add_argument("folder", help="推論対象のフォルダパス")
+parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス")
 parser.add_argument("--filter", choices=["wrong"], help="誤分類のみ表示")
 parser.add_argument("--csv", default="result.csv", help="保存するCSVファイル名（例: result.csv）")
 parser.add_argument("--experiment", help="保存先 experiments/ のサブフォルダ名（例: 20240603_light_normal）")
