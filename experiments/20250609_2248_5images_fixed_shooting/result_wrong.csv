@@ -1,0 +1,3 @@
+path,true,pred,correct
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16482325_0.jpg,clip,hook_ring,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_small\S__16482336_0.jpg,magnet_clip_small,hook_ring,False
