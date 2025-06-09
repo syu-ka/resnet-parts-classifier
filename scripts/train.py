@@ -11,6 +11,9 @@ import random
 import numpy as np
 import argparse
 
+# --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="ResNet18 の学習スクリプト")
 parser.add_argument("--seed", type=int, help="乱数シードを指定（例: --seed 42）")
@@ -30,17 +33,19 @@ torch.cuda.manual_seed(args.seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-# --- パス設定 ---
-train_dir = "../data/train"
-val_dir = "../data/val"
+# --- パス設定（絶対パス） ---
+train_dir = os.path.join(BASE_DIR, "../data/train")
+val_dir = os.path.join(BASE_DIR, "../data/val")
+print(f"🔍 学習データディレクトリ: {train_dir}")
+print(f"🔍 バリデーションデータディレクトリ: {val_dir}")
 
-# --- 出力先フォルダを作成 ---
+# --- 出力先フォルダを作成（絶対パス） ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 if args.expname:
     exp_name = f"{timestamp}_{args.expname}"
 else:
     exp_name = timestamp
-exp_dir = os.path.join("../experiments_train", exp_name)
+exp_dir = os.path.join(BASE_DIR, "../experiments_train", exp_name)
 os.makedirs(exp_dir, exist_ok=True)
 model_output_path = os.path.join(exp_dir, "resnet18.pth")
 

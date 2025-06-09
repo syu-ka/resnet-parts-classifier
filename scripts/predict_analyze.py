@@ -22,13 +22,18 @@ import csv
 from datetime import datetime
 import shutil
 
-# --- クラス名を ../data/train から取得 ---
-train_dir = "../data/train"
+# --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# --- パス設定（絶対パス） ---
+train_dir = os.path.join(BASE_DIR, "../data/train")
+train_exp_dir = os.path.join(BASE_DIR, "../experiments_train")
+
+# --- クラス名を train_dir から取得 ---
 classes = sorted(os.listdir(train_dir))
 num_classes = len(classes)
 
 # --- 最新の学習モデルを取得 ---
-train_exp_dir = "../experiments_train"
 subdirs = [
     d for d in os.listdir(train_exp_dir)
     if os.path.isdir(os.path.join(train_exp_dir, d)) and d[:8].isdigit()
@@ -53,6 +58,8 @@ parser = argparse.ArgumentParser(description="画像分類の結果を表示・C
 parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス（省略可）")
 parser.add_argument("--expname", help="検証実験名を指定. experiments/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
 args = parser.parse_args()
+# --- args.folder を絶対パスに変換（引数で指定されても、されなくても） ---
+args.folder = os.path.join(BASE_DIR, args.folder)
 
 # --- 入力フォルダ確認 ---
 if not os.path.exists(args.folder) or not os.path.isdir(args.folder):
@@ -66,7 +73,7 @@ if args.expname:
 else:
     exp_name = timestamp
 
-exp_dir = os.path.join("../experiments", exp_name)
+exp_dir = os.path.join(BASE_DIR, "../experiments", exp_name)
 os.makedirs(exp_dir, exist_ok=True)
 
 # --- 誤分類画像保存用フォルダを作成 ---
@@ -143,7 +150,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
         cfg.write(f" - {cls} ({predict_count})\n")
     cfg.write(f"全推論画像数: {total_predict_images} 枚\n")
 
-    shooting_path = os.path.join("..", "config", "shooting.txt")
+    shooting_path = os.path.join(BASE_DIR, "../config/shooting.txt")
     if os.path.exists(shooting_path):
         cfg.write("\n撮影条件:\n")
         with open(shooting_path, "r", encoding="utf-8") as shoot:

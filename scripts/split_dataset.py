@@ -8,10 +8,13 @@ import random
 from pathlib import Path
 import stat
 
-# --- 設定 ---
-original_data_dir = "../raw_images"  # 元画像がある場所（クラス別フォルダ）
-output_dir = "../data"               # 出力先（train/valに分かれる）
-train_ratio = 0.8                    # 学習用の割合（80%）
+# --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# --- 設定（絶対パス） ---
+original_data_dir = os.path.join(BASE_DIR, "../raw_images") # 元画像がある場所（クラス別フォルダ）
+output_dir = os.path.join(BASE_DIR, "../data")              # 出力先（train/valに分かれる）
+train_ratio = 0.8                                           # 学習用の割合（80%）
 
 # ランダムな分割を毎回同じにするためのシード
 random.seed(42)
