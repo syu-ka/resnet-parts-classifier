@@ -1,10 +1,12 @@
 # raw_images/ 以下のクラス別画像を train/val に分割して data/ にコピーします。
 # raw_images 側の画像は削除せず、train/val は実行時に初期化されます。
+# Windows環境の PermissionError に強い rmtree 実装を使用。
 
 import os
 import shutil
 import random
 from pathlib import Path
+import stat
 
 # --- 設定 ---
 original_data_dir = "../raw_images"  # 元画像がある場所（クラス別フォルダ）
@@ -14,12 +16,17 @@ train_ratio = 0.8                    # 学習用の割合（80%）
 # ランダムな分割を毎回同じにするためのシード
 random.seed(42)
 
+# --- アクセス拒否対応：削除時に読み取り専用属性を解除 ---
+def handle_remove_readonly(func, path, exc_info):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
 # --- 既存の data/train, data/val を削除して空にする ---
 for phase in ["train", "val"]:
     phase_dir = os.path.join(output_dir, phase)
     if os.path.exists(phase_dir):
-        shutil.rmtree(phase_dir)           # 中身を全部削除
-    os.makedirs(phase_dir, exist_ok=True)  # 空の状態で再作成
+        shutil.rmtree(phase_dir, onerror=handle_remove_readonly)
+    os.makedirs(phase_dir, exist_ok=True)
 
 # --- raw_images 内の各クラスごとに処理 ---
 for class_name in os.listdir(original_data_dir):
