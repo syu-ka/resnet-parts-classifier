@@ -1,0 +1,15 @@
+path,true,pred,correct
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16523282_0.jpg,clip,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16523286_0.jpg,clip,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16531461_0.jpg,clip,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16531462_0.jpg,clip,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16547842_0.jpg,clip,hook_ring,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\clip\S__16547846_0.jpg,clip,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_big\S__16539671_0.jpg,magnet_clip_big,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_big\S__16547871_0.jpg,magnet_clip_big,magnet_clip_small,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16531485_0.jpg,ring,magnet_clip_big,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16539692_0.jpg,ring,magnet_clip_big,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16539693_0.jpg,ring,magnet_clip_big,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16547890_0.jpg,ring,magnet_clip_big,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16547895_0.jpg,ring,magnet_clip_big,False
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\ring\S__16547896_0.jpg,ring,magnet_clip_big,False

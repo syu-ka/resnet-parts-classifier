@@ -1,0 +1,40 @@
+検証実験名: 20250610_0043_imageCount_each_30
+日時: 20250610_0043
+正解数: 30/30 (正解率: 100.00%)
+検証対象: C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val
+出力ファイル:
+ - result_all.csv（全件）
+ - result_wrong.csv（誤分類）
+全クラス数: 5
+使用クラス(検証画像枚数):
+ - clip (6)
+ - hook_ring (6)
+ - magnet_clip_big (6)
+ - magnet_clip_small (6)
+ - ring (6)
+全推論画像数: 30 枚
+
+撮影条件:
+ - カメラの位置: 固定
+ - カメラの高さ: 15cmに固定
+ - カメラの拡大率: ×3で固定
+ - 光: 部屋の天井のライト, カメラのフラッシュ
+ - 背景: コピー用紙
+ - 物体の位置: 非固定
+ - 物体の向き: 非固定
+
+使用モデルの詳細:
+ - 日時: 20250610_0041
+ - モデル名: imageCount_each_30
+ - 全クラス数: 5
+ - エポック数: 10
+ - 最適化手法: Adam (lr=0.001)
+ - 損失関数: CrossEntropyLoss
+ - シード: 164821
+ - 使用クラス（学習画像枚数）:
+ - - clip（24）
+ - - hook_ring（24）
+ - - magnet_clip_big（24）
+ - - magnet_clip_small（24）
+ - - ring（24）
+ - 全画像数: 120
