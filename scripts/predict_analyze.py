@@ -50,7 +50,7 @@ transform = transforms.Compose([
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="画像分類の結果を表示・CSV出力（全件 + 誤分類）")
 parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス（省略可）")
-parser.add_argument("--expname", help="推論名を指定. experiments/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
+parser.add_argument("--expname", help="検証実験名を指定. experiments/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
 args = parser.parse_args()
 
 # --- 入力フォルダ確認 ---
@@ -76,7 +76,7 @@ os.makedirs(misclassified_dir, exist_ok=True)
 results = []
 total = 0
 correct = 0
-print(f"\n📊 推論結果（{args.folder}）:")
+print(f"\n📊 検証結果（{args.folder}）:")
 for root, _, files in os.walk(args.folder):
     for filename in files:
         if filename.lower().endswith((".jpg", ".jpeg", ".png")):
@@ -120,16 +120,16 @@ print(f"\n🎯 正解数: {correct}/{total} (正解率: {accuracy:.2f}%)")
 config_path = os.path.join(exp_dir, "config.txt")
 with open(config_path, "w", encoding="utf-8") as cfg:
     if args.expname:
-        cfg.write(f"推論名: {exp_name}\n")
+        cfg.write(f"検証実験名: {exp_name}\n")
     else:
-        cfg.write(f"推論名: {exp_name}（自動命名）\n")
+        cfg.write(f"検証実験名: {exp_name}（自動命名）\n")
     cfg.write(f"日時: {timestamp}\n")
     cfg.write(f"正解数: {correct}/{total} (正解率: {accuracy:.2f}%)\n")
-    cfg.write(f"推論対象: {args.folder}\n")
+    cfg.write(f"検証対象: {args.folder}\n")
     cfg.write("出力ファイル:\n")
     cfg.write(" - result_all.csv（全件）\n")
     cfg.write(" - result_wrong.csv（誤分類）\n")
-    cfg.write("使用クラス(推論画像枚数):\n")
+    cfg.write("使用クラス(検証画像枚数):\n")
     total_predict_images = 0
     for cls in classes:
         predict_path = os.path.join(args.folder, cls)
