@@ -25,6 +25,7 @@ import shutil
 # --- クラス名を ../data/train から取得 ---
 train_dir = "../data/train"
 classes = sorted(os.listdir(train_dir))
+num_classes = len(classes)
 
 # --- 最新の学習モデルを取得 ---
 train_exp_dir = "../experiments_train"
@@ -129,6 +130,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write("出力ファイル:\n")
     cfg.write(" - result_all.csv（全件）\n")
     cfg.write(" - result_wrong.csv（誤分類）\n")
+    cfg.write(f"全クラス数: {num_classes}\n")
     cfg.write("使用クラス(検証画像枚数):\n")
     total_predict_images = 0
     for cls in classes:

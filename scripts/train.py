@@ -136,6 +136,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"損失関数: CrossEntropyLoss\n")
     cfg.write(f"シード: {args.seed}\n")
     cfg.write(f"画像ファイル一覧: train_images.txt に記録済み\n")
+    cfg.write(f"全クラス数: {num_classes}\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
     total_train_images = 0
     for cls in classes:

@@ -5,6 +5,7 @@
 損失関数: CrossEntropyLoss
 シード: 308486
 画像ファイル一覧: train_images.txt に記録済み
+全クラス数: 5
 使用クラス（学習画像枚数）:
  - clip（8）
  - hook_ring（8）

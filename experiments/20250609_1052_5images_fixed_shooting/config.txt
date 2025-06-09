@@ -6,7 +6,8 @@
 出力ファイル:
  - result_all.csv（全件）
  - result_wrong.csv（誤分類）
- 使用クラス(検証画像枚数):
+全クラス数: 5
+使用クラス(検証画像枚数):
  - clip (1)
  - hook_ring (1)
  - magnet_clip_big (1)
@@ -31,6 +32,7 @@
  - 損失関数: CrossEntropyLoss
  - シード: 632427
  - 画像ファイル一覧: train_images.txt に記録済み
+ - 全クラス数: 5
  - 使用クラス（学習画像枚数）:
  - - clip（4）
  - - hook_ring（4）
