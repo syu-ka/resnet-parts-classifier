@@ -21,13 +21,14 @@ import argparse
 import csv
 from datetime import datetime
 import shutil
+from pathlib import Path
 
 # --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
 
 # --- パス設定（絶対パス） ---
-train_dir = os.path.join(BASE_DIR, "../data/train")
-train_exp_dir = os.path.join(BASE_DIR, "../experiments_train")
+train_dir = (BASE_DIR / "../data/train").resolve()
+train_exp_dir = (BASE_DIR / "../experiments_train").resolve()
 
 # --- クラス名を train_dir から取得 ---
 classes = sorted(os.listdir(train_dir))
@@ -39,7 +40,7 @@ subdirs = [
     if os.path.isdir(os.path.join(train_exp_dir, d)) and d[:8].isdigit()
 ]
 latest_train_dir = sorted(subdirs)[-1]
-model_path = os.path.join(train_exp_dir, latest_train_dir, "resnet18.pth")
+model_path = train_exp_dir / latest_train_dir / "resnet18.pth"
 
 # --- モデル準備 ---
 model = models.resnet18(pretrained=False)
@@ -59,7 +60,7 @@ parser.add_argument("folder", nargs="?", default="../data/val", help="推論対�
 parser.add_argument("--expname", help="検証実験名を指定. experiments/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
 args = parser.parse_args()
 # --- args.folder を絶対パスに変換（引数で指定されても、されなくても） ---
-args.folder = os.path.join(BASE_DIR, args.folder)
+args.folder = (BASE_DIR / args.folder).resolve()
 
 # --- 入力フォルダ確認 ---
 if not os.path.exists(args.folder) or not os.path.isdir(args.folder):
@@ -73,11 +74,11 @@ if args.expname:
 else:
     exp_name = timestamp
 
-exp_dir = os.path.join(BASE_DIR, "../experiments", exp_name)
+exp_dir = (BASE_DIR / "../experiments" / exp_name).resolve()
 os.makedirs(exp_dir, exist_ok=True)
 
 # --- 誤分類画像保存用フォルダを作成 ---
-misclassified_dir = os.path.join(exp_dir, "misclassified_images")
+misclassified_dir = exp_dir / "misclassified_images"
 os.makedirs(misclassified_dir, exist_ok=True)
 
 # --- 推論処理開始 ---
@@ -88,8 +89,8 @@ print(f"\n📊 検証結果（{args.folder}）:")
 for root, _, files in os.walk(args.folder):
     for filename in files:
         if filename.lower().endswith((".jpg", ".jpeg", ".png")):
-            img_path = os.path.join(root, filename)
-            true_label = os.path.basename(os.path.dirname(img_path))
+            img_path = Path(root) / filename
+            true_label = true_label = img_path.parent.name
 
             image = Image.open(img_path).convert("RGB")
             image = transform(image).unsqueeze(0)
@@ -105,7 +106,7 @@ for root, _, files in os.walk(args.folder):
                 correct += 1
 
             if not is_correct:
-                dst_path = os.path.join(misclassified_dir, os.path.basename(img_path))
+                dst_path = misclassified_dir / img_path.name
                 shutil.copy2(img_path, dst_path)
 
             results.append({
@@ -118,7 +119,7 @@ for root, _, files in os.walk(args.folder):
 # --- 表示 ---
 for r in results:
     mark = "✅" if r["correct"] else "❌"
-    print(f"{mark} {r['path']} | 正解: {r['true']} | 予測: {r['pred']}")
+    print(f"{mark} {Path(r['path']).as_posix()} | 正解: {r['true']} | 予測: {r['pred']}")
 
 # --- 統計 ---
 accuracy = 100 * correct / total if total else 0
@@ -150,7 +151,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
         cfg.write(f" - {cls} ({predict_count})\n")
     cfg.write(f"全推論画像数: {total_predict_images} 枚\n")
 
-    shooting_path = os.path.join(BASE_DIR, "../config/shooting.txt")
+    shooting_path = (BASE_DIR / "../config/shooting.txt").resolve()
     if os.path.exists(shooting_path):
         cfg.write("\n撮影条件:\n")
         with open(shooting_path, "r", encoding="utf-8") as shoot:
@@ -170,7 +171,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
         cfg.write("\n使用モデルの詳細: train_config.txt が見つかりません\n")
 
 # --- CSV（全件）保存 ---
-output_all = os.path.join(exp_dir, "result_all.csv")
+output_all = exp_dir / "result_all.csv"
 with open(output_all, "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
     writer.writeheader()
@@ -178,7 +179,7 @@ with open(output_all, "w", newline="", encoding="utf-8") as f:
         writer.writerow(r)
 
 # --- CSV（誤分類のみ）保存 ---
-output_wrong = os.path.join(exp_dir, "result_wrong.csv")
+output_wrong = exp_dir / "result_wrong.csv"
 with open(output_wrong, "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
     writer.writeheader()

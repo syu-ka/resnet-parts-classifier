@@ -1,29 +1,29 @@
 # このスクリプトは、data/train および data/val を使って ResNet18 を学習し、
-# ../experiments_train/以下に日時付きのモデル名フォルダを作成して、学習済みモデルと設定情報（train_config.txt）を保存します。
+# ../experiments_train/以下に日時付きのフォルダを作成して、学習済みモデルと設定情報（train_config.txt、train_images.txt）を保存します。
 
 import torch
 import torchvision.transforms as transforms
 from torchvision import datasets, models
 from torch import nn, optim
-import os
+from pathlib import Path
 from datetime import datetime
 import random
 import numpy as np
 import argparse
 
-# --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# --- BASE_DIR を scripts/ に設定 ---
+BASE_DIR = Path(__file__).resolve().parent
 
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="ResNet18 の学習スクリプト")
 parser.add_argument("--seed", type=int, help="乱数シードを指定（例: --seed 42）")
-parser.add_argument("--expname", type=str, help="モデル名を指定. experiments_train/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
+parser.add_argument("--expname", help="学習実験名（例: bright_800lux）")
 args = parser.parse_args()
 
-# --- 乱数シードの設定（オプション） ---
+# --- 乱数シードの設定（固定 or ランダム） ---
 if args.seed is not None:
     print(f"🔒 乱数シードを {args.seed} に固定します")
-else :
+else:
     args.seed = random.randint(0, 999999)
     print(f"🔄 シードが指定されていないため、ランダムに {args.seed} を使用します")
 random.seed(args.seed)
@@ -33,24 +33,24 @@ torch.cuda.manual_seed(args.seed)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-# --- パス設定（絶対パス） ---
-train_dir = os.path.join(BASE_DIR, "../data/train")
-val_dir = os.path.join(BASE_DIR, "../data/val")
-print(f"🔍 学習データディレクトリ: {train_dir}")
-print(f"🔍 バリデーションデータディレクトリ: {val_dir}")
+# --- パス設定 ---
+train_dir = (BASE_DIR / "../data/train").resolve()
+val_dir = (BASE_DIR / "../data/val").resolve()
 
-# --- 出力先フォルダを作成（絶対パス） ---
+# --- 出力先フォルダを作成 ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 if args.expname:
-    exp_name = f"{timestamp}_{args.expname}"
+    exp_dir = (BASE_DIR / f"../experiments_train/{timestamp}_{args.expname}").resolve()
 else:
-    exp_name = timestamp
-exp_dir = os.path.join(BASE_DIR, "../experiments_train", exp_name)
-os.makedirs(exp_dir, exist_ok=True)
-model_output_path = os.path.join(exp_dir, "resnet18.pth")
+    exp_dir = (BASE_DIR / f"../experiments_train/{timestamp}").resolve()
+exp_dir.mkdir(parents=True, exist_ok=True)
 
-# --- クラス数（自動取得） ---
-classes = sorted(os.listdir(train_dir))
+model_output_path = exp_dir / "resnet18.pth"
+config_path = exp_dir / "train_config.txt"
+images_list_path = exp_dir / "train_images.txt"
+
+# --- クラス数（ディレクトリ名で自動取得） ---
+classes = sorted([d.name for d in train_dir.iterdir() if d.is_dir()])
 num_classes = len(classes)
 
 # --- 前処理 ---
@@ -60,8 +60,8 @@ transform = transforms.Compose([
 ])
 
 # --- データセットとデータローダ ---
-train_dataset = datasets.ImageFolder(train_dir, transform=transform)
-val_dataset = datasets.ImageFolder(val_dir, transform=transform)
+train_dataset = datasets.ImageFolder(str(train_dir), transform=transform)
+val_dataset = datasets.ImageFolder(str(val_dir), transform=transform)
 
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=8, shuffle=True)
 val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=8)
@@ -114,42 +114,30 @@ for epoch in range(num_epochs):
 torch.save(model.state_dict(), model_output_path)
 print(f"✅ モデル保存完了: {model_output_path}")
 
-# --- train_images.txt に学習画像のパスを記録 ---
-image_list_path = os.path.join(exp_dir, "train_images.txt")
-with open(image_list_path, "w", encoding="utf-8") as imglist:
-    for cls in classes:
-        cls_dir = os.path.join(train_dir, cls)
-        image_files = sorted([
-            f for f in os.listdir(cls_dir)
-            if os.path.isfile(os.path.join(cls_dir, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
-        ])
-        for f in image_files:
-            # 相対パスとして記録（例: clip/S__12345.jpg）
-            imglist.write(f"{cls}/{f}\n")
-
-
 # --- train_config.txt に設定を記録 ---
-config_path = os.path.join(exp_dir, "train_config.txt")
-with open(config_path, "w", encoding="utf-8") as cfg:
-    if args.expname:
-        cfg.write(f"モデル名: {exp_name}\n")
-    else:
-        cfg.write(f"モデル名: {exp_name}（自動命名）\n")
+with config_path.open("w", encoding="utf-8") as cfg:
     cfg.write(f"日時: {timestamp}\n")
+    if args.expname:
+        cfg.write(f"モデル名: {args.expname}\n")
+    cfg.write(f"全クラス数: {num_classes}\n")
     cfg.write(f"エポック数: {num_epochs}\n")
     cfg.write(f"最適化手法: Adam (lr=0.001)\n")
     cfg.write(f"損失関数: CrossEntropyLoss\n")
     cfg.write(f"シード: {args.seed}\n")
-    cfg.write(f"画像ファイル一覧: train_images.txt に記録済み\n")
-    cfg.write(f"全クラス数: {num_classes}\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
-    total_train_images = 0
+
+    total_images = 0
     for cls in classes:
-        cls_dir = os.path.join(train_dir, cls)
-        count = len([
-            f for f in os.listdir(cls_dir)
-            if os.path.isfile(os.path.join(cls_dir, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
-        ])
-        total_train_images += count
+        cls_dir = train_dir / cls
+        count = len([f for f in cls_dir.iterdir() if f.is_file() and f.suffix.lower() in [".jpg", ".jpeg", ".png"]])
         cfg.write(f" - {cls}（{count}）\n")
-    cfg.write(f"全学習画像数: {total_train_images} 枚\n")
+        total_images += count
+    cfg.write(f"全画像数: {total_images}\n")
+
+# --- train_images.txt にファイル一覧を出力 ---
+with images_list_path.open("w", encoding="utf-8") as f:
+    for cls in classes:
+        cls_dir = train_dir / cls
+        for img in sorted(cls_dir.iterdir()):
+            if img.is_file() and img.suffix.lower() in [".jpg", ".jpeg", ".png"]:
+                f.write(str(img.resolve()) + "\n")

@@ -1,4 +1,0 @@
-path,true,pred,correct
-../data/val\magnet_clip_big\S__16482321_0.jpg,magnet_clip_big,clip,False
-../data/val\magnet_clip_small\S__16482340_0.jpg,magnet_clip_small,clip,False
-../data/val\magnet_clip_small\S__16482341_0.jpg,magnet_clip_small,clip,False
