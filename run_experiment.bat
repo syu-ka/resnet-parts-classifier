@@ -6,7 +6,7 @@
 chcp 65001 >nul
 
 REM --- 実験名の指定（空白の場合は省略） ---
-set EXP_NAME=5images_fixed_shooting
+set EXP_NAME=imageCount_each_5_light_flash_magnificationRate_3
 
 REM --- 乱数シードの指定（空白の場合は省略） ---
 @REM set SEED=42
