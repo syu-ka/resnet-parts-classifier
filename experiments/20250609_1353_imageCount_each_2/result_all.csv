@@ -1,0 +1,11 @@
+path,true,pred,correct
+../data/val\clip\S__16482323_0.jpg,clip,clip,True
+../data/val\clip\S__16482325_0.jpg,clip,clip,True
+../data/val\hook_ring\S__16482363_0.jpg,hook_ring,hook_ring,True
+../data/val\hook_ring\S__16482366_0.jpg,hook_ring,hook_ring,True
+../data/val\magnet_clip_big\S__16482316_0.jpg,magnet_clip_big,magnet_clip_big,True
+../data/val\magnet_clip_big\S__16482321_0.jpg,magnet_clip_big,clip,False
+../data/val\magnet_clip_small\S__16482340_0.jpg,magnet_clip_small,clip,False
+../data/val\magnet_clip_small\S__16482341_0.jpg,magnet_clip_small,clip,False
+../data/val\ring\S__16482347_0.jpg,ring,ring,True
+../data/val\ring\S__16482351_0.jpg,ring,ring,True
