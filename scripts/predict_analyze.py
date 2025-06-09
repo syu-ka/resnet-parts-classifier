@@ -145,7 +145,8 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     if os.path.exists(shooting_path):
         cfg.write("\n撮影条件:\n")
         with open(shooting_path, "r", encoding="utf-8") as shoot:
-            cfg.write(f"{shoot.read()}\n")
+            for line in shoot:
+                cfg.write(f" - {line.strip()}\n")
     else:
         cfg.write("\n撮影条件: shooting.txt が見つかりません\n")
 
