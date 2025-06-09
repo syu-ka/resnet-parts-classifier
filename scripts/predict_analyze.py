@@ -1,16 +1,16 @@
 # このスクリプトは、指定フォルダ（未記入だと../data/val）以下の画像に対して
 # 画像分類モデルを用いて推論を行い、
 # 各画像の正解ラベル（フォルダ名）と予測ラベルを比較して結果を出力します。
-# 全件表示・誤分類のみ表示・CSV出力に対応しており、学習条件や撮影条件が異なる実験ごとに
-# 結果を整理して保存できるよう、--experiment オプションにより experiments/ 以下に
-# 実験名付きのフォルダを作成して保存されます。
-# --experiment オプションを使用しない場合は日付＋時刻による自動命名、
-# 使用した場合はそこで指定した実験名（例: light_normal）に
-# 日付＋時刻が自動で先頭に付けられます（例: 20250604_2338_light_normal）。
-# また、実行時の設定や使用クラスを記録した config.txt が実験フォルダに保存され、
-# 誤分類された画像は misclassified_images/ フォルダにコピー保存されます。
-# 使用するモデルは ../experiments_train/ 以下の最新の resnet18.pth を自動で読み込み、
-# その学習条件（train_config.txt）も config.txt に記録されます。
+# 学習条件や撮影条件が異なる実験ごとに結果を整理して保存できるよう、
+# --experiment オプションにより experiments/ 以下に日時付きの推論名フォルダを作成して、
+# その中にconfig.txt、misclassified_images/、2種類のcsvが保存されます。
+# --experiment オプションを使用しない場合は日時のみのフォルダになります。
+# config.txt：実行時の設定や使用したモデルの学習条件を記録します。
+# 使用するモデルは ../experiments_train/ 以下の最新の resnet18.pth です。
+# misclassified_images/ フォルダ：誤分類された画像がここにコピー保存されます。
+# 2種類のCSVファイル：
+# - result_all.csv：全ての画像の結果を保存します。
+# - result_wrong.csv：誤分類された画像のみの結果を保存します。
 
 import torch
 from torchvision import models, transforms
@@ -50,7 +50,7 @@ transform = transforms.Compose([
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="画像分類の結果を表示・CSV出力（全件 + 誤分類）")
 parser.add_argument("folder", nargs="?", default="../data/val", help="推論対象のフォルダパス（省略可）")
-parser.add_argument("--expname", help="保存先 experiments/ のサブフォルダ名（接尾辞）例: debug_lighting")
+parser.add_argument("--expname", help="推論名を指定. experiments/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
 args = parser.parse_args()
 
 # --- 入力フォルダ確認 ---
@@ -119,21 +119,27 @@ print(f"\n🎯 正解数: {correct}/{total} (正解率: {accuracy:.2f}%)")
 # --- config.txt を保存 ---
 config_path = os.path.join(exp_dir, "config.txt")
 with open(config_path, "w", encoding="utf-8") as cfg:
+    if args.expname:
+        cfg.write(f"推論名: {exp_name}\n")
+    else:
+        cfg.write(f"推論名: {exp_name}（自動命名）\n")
     cfg.write(f"日時: {timestamp}\n")
     cfg.write(f"正解数: {correct}/{total} (正解率: {accuracy:.2f}%)\n")
     cfg.write(f"推論対象: {args.folder}\n")
     cfg.write("出力ファイル:\n")
     cfg.write(" - result_all.csv（全件）\n")
     cfg.write(" - result_wrong.csv（誤分類）\n")
-    cfg.write(" 使用クラス(推論画像枚数):\n")
+    cfg.write("使用クラス(推論画像枚数):\n")
+    total_predict_images = 0
     for cls in classes:
         predict_path = os.path.join(args.folder, cls)
         predict_count = len([
             f for f in os.listdir(predict_path)
             if os.path.isfile(os.path.join(predict_path, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
         ]) if os.path.exists(predict_path) else 0
-
+        total_predict_images += predict_count
         cfg.write(f" - {cls} ({predict_count})\n")
+    cfg.write(f"全推論画像数: {total_predict_images} 枚\n")
 
     shooting_path = os.path.join("..", "config", "shooting.txt")
     if os.path.exists(shooting_path):
@@ -143,14 +149,15 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     else:
         cfg.write("\n撮影条件: shooting.txt が見つかりません\n")
 
-    # --- 使用モデルの学習条件 ---
+    # --- 使用モデル ---
     train_config_path = os.path.join(train_exp_dir, latest_train_dir, "train_config.txt")
     if os.path.exists(train_config_path):
-        cfg.write("\n使用モデルの学習条件:\n")
-        with open(train_config_path, "r", encoding="utf-8") as f:
-            cfg.write(f.read())
+        cfg.write("\n使用モデルの詳細:\n")
+        with open(train_config_path, "r", encoding="utf-8") as tcf:
+            for line in tcf:
+                cfg.write(f" - {line.strip()}\n")
     else:
-        cfg.write("\n使用モデルの学習条件: train_config.txt が見つかりません\n")
+        cfg.write("\n使用モデルの詳細: train_config.txt が見つかりません\n")
 
 # --- CSV（全件）保存 ---
 output_all = os.path.join(exp_dir, "result_all.csv")

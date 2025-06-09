@@ -1,5 +1,5 @@
 # このスクリプトは、data/train および data/val を使って ResNet18 を学習し、
-# ../experiments_train/以下に日時付きのフォルダを作成して、学習済みモデルと設定情報（train_config.txt）を保存します。
+# ../experiments_train/以下に日時付きのモデル名フォルダを作成して、学習済みモデルと設定情報（train_config.txt）を保存します。
 
 import torch
 import torchvision.transforms as transforms
@@ -14,6 +14,7 @@ import argparse
 # --- 引数処理 ---
 parser = argparse.ArgumentParser(description="ResNet18 の学習スクリプト")
 parser.add_argument("--seed", type=int, help="乱数シードを指定（例: --seed 42）")
+parser.add_argument("--expname", type=str, help="モデル名を指定. experiments_train/ のサブフォルダ名（接尾辞）にもなる（例: --expname imageCount_100）")
 args = parser.parse_args()
 
 # --- 乱数シードの設定（オプション） ---
@@ -35,7 +36,11 @@ val_dir = "../data/val"
 
 # --- 出力先フォルダを作成 ---
 timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-exp_dir = os.path.join("../experiments_train", timestamp)
+if args.expname:
+    exp_name = f"{timestamp}_{args.expname}"
+else:
+    exp_name = timestamp
+exp_dir = os.path.join("../experiments_train", exp_name)
 os.makedirs(exp_dir, exist_ok=True)
 model_output_path = os.path.join(exp_dir, "resnet18.pth")
 
@@ -121,6 +126,10 @@ with open(image_list_path, "w", encoding="utf-8") as imglist:
 # --- train_config.txt に設定を記録 ---
 config_path = os.path.join(exp_dir, "train_config.txt")
 with open(config_path, "w", encoding="utf-8") as cfg:
+    if args.expname:
+        cfg.write(f"モデル名: {exp_name}\n")
+    else:
+        cfg.write(f"モデル名: {exp_name}（自動命名）\n")
     cfg.write(f"日時: {timestamp}\n")
     cfg.write(f"エポック数: {num_epochs}\n")
     cfg.write(f"最適化手法: Adam (lr=0.001)\n")
@@ -128,10 +137,13 @@ with open(config_path, "w", encoding="utf-8") as cfg:
     cfg.write(f"シード: {args.seed}\n")
     cfg.write(f"画像ファイル一覧: train_images.txt に記録済み\n")
     cfg.write("使用クラス（学習画像枚数）:\n")
+    total_train_images = 0
     for cls in classes:
         cls_dir = os.path.join(train_dir, cls)
         count = len([
             f for f in os.listdir(cls_dir)
             if os.path.isfile(os.path.join(cls_dir, f)) and f.lower().endswith((".jpg", ".jpeg", ".png"))
         ])
+        total_train_images += count
         cfg.write(f" - {cls}（{count}）\n")
+    cfg.write(f"全学習画像数: {total_train_images} 枚\n")
