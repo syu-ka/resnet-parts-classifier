@@ -1,6 +1,0 @@
-path,true,pred,correct
-../data/val\clip\S__16482323_0.jpg,clip,clip,True
-../data/val\hook_ring\S__16482358_0.jpg,hook_ring,clip,False
-../data/val\magnet_clip_big\S__16482317_0.jpg,magnet_clip_big,clip,False
-../data/val\magnet_clip_small\S__16482334_0.jpg,magnet_clip_small,magnet_clip_small,True
-../data/val\ring\S__16482347_0.jpg,ring,ring,True
