@@ -1,0 +1,14 @@
+日時: 20250610_0115
+モデル名: imageCount_each_50
+全クラス数: 5
+エポック数: 10
+最適化手法: Adam (lr=0.001)
+損失関数: CrossEntropyLoss
+シード: 313609
+使用クラス（学習画像枚数）:
+ - clip（40）
+ - hook_ring（40）
+ - magnet_clip_big（40）
+ - magnet_clip_small（40）
+ - ring（40）
+全画像数: 200
