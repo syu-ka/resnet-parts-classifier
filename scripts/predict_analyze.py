@@ -24,6 +24,7 @@ import shutil
 from pathlib import Path
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
+import torch.nn.functional as F # モデルの出力をSoftmaxでスコアに変換するため
 
 # --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -99,6 +100,8 @@ for root, _, files in os.walk(args.folder):
 
             with torch.no_grad():
                 outputs = model(image)
+                probs = F.softmax(outputs, dim=1)
+                confidence = probs.max().item()
                 _, predicted = torch.max(outputs, 1)
                 predicted_label = classes[predicted.item()]
 
@@ -116,6 +119,7 @@ for root, _, files in os.walk(args.folder):
                 "true": true_label,
                 "pred": predicted_label,
                 "correct": is_correct,
+                "confidence": round(confidence, 3)  # 小数第3位までに丸めて見やすく
             })
 
 
@@ -146,7 +150,7 @@ else:
 # --- 表示 ---
 for r in results:
     mark = "✅" if r["correct"] else "❌"
-    print(f"{mark} {Path(r['path']).as_posix()} | 正解: {r['true']} | 予測: {r['pred']}")
+    print(f"{mark} {Path(r['path']).as_posix()} | 正解: {r['true']} | 予測: {r['pred']} | 確信度: {r['confidence']:.3f}")
 
 # --- 統計 ---
 accuracy = 100 * correct / total if total else 0
@@ -200,7 +204,7 @@ with open(config_path, "w", encoding="utf-8") as cfg:
 # --- CSV（全件）保存 ---
 output_all = exp_dir / "result_all.csv"
 with open(output_all, "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
+    writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct", "confidence"])
     writer.writeheader()
     for r in results:
         writer.writerow(r)
@@ -208,7 +212,7 @@ with open(output_all, "w", newline="", encoding="utf-8") as f:
 # --- CSV（誤分類のみ）保存 ---
 output_wrong = exp_dir / "result_wrong.csv"
 with open(output_wrong, "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct"])
+    writer = csv.DictWriter(f, fieldnames=["path", "true", "pred", "correct", "confidence"])
     writer.writeheader()
     for r in results:
         if not r["correct"]:
