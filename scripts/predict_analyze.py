@@ -22,6 +22,8 @@ import csv
 from datetime import datetime
 import shutil
 from pathlib import Path
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 # --- スクリプトのあるディレクトリを基準に絶対パスを構築 ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -115,6 +117,31 @@ for root, _, files in os.walk(args.folder):
                 "pred": predicted_label,
                 "correct": is_correct,
             })
+
+
+# --- 混同行列を作成・保存 ---
+true_labels = [r["true"] for r in results]
+pred_labels = [r["pred"] for r in results]
+
+if true_labels and pred_labels:
+    cm = confusion_matrix(true_labels, pred_labels, labels=classes)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    disp.plot(ax=ax, cmap="Blues", colorbar=False, xticks_rotation=45)
+    plt.title("Confusion Matrix")
+    plt.tight_layout()
+
+    # 保存
+    confusion_path = os.path.join(exp_dir, "confusion_matrix.png")
+    plt.savefig(confusion_path)
+    print(f"🖼️ 混同行列を保存しました: {confusion_path}")
+
+    # 表示
+    # plt.show()
+else:
+    print("⚠️ 混同行列の作成に必要なデータが不足しています")
+
 
 # --- 表示 ---
 for r in results:
