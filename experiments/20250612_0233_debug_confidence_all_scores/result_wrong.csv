@@ -1,0 +1,5 @@
+path,true,pred,correct,confidence,all_scores
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_small\S__16531478_0.jpg,magnet_clip_small,clip,False,0.947,"{""clip"": 0.9466, ""hook_ring"": 0.0022, ""magnet_clip_big"": 0.016, ""magnet_clip_small"": 0.0236, ""ring"": 0.0117}"
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_small\S__16539680_0.jpg,magnet_clip_small,clip,False,0.895,"{""clip"": 0.8954, ""hook_ring"": 0.0063, ""magnet_clip_big"": 0.0299, ""magnet_clip_small"": 0.0399, ""ring"": 0.0286}"
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_small\S__16547885_0.jpg,magnet_clip_small,hook_ring,False,0.486,"{""clip"": 0.3226, ""hook_ring"": 0.4858, ""magnet_clip_big"": 0.0029, ""magnet_clip_small"": 0.1834, ""ring"": 0.0053}"
+C:\Users\yuka\OneDrive - 長崎総合科学大学\卒業研究\resnet_parts_classifier\data\val\magnet_clip_small\S__16556074_0.jpg,magnet_clip_small,clip,False,0.749,"{""clip"": 0.7488, ""hook_ring"": 0.0827, ""magnet_clip_big"": 0.0029, ""magnet_clip_small"": 0.1633, ""ring"": 0.0024}"

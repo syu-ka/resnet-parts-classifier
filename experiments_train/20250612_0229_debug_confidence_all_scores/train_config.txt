@@ -1,0 +1,14 @@
+日時: 20250612_0229
+モデル名: debug_confidence_all_scores
+全クラス数: 5
+エポック数: 10
+最適化手法: Adam (lr=0.001)
+損失関数: CrossEntropyLoss
+シード: 81900
+使用クラス（学習画像枚数）:
+ - clip（40）
+ - hook_ring（40）
+ - magnet_clip_big（40）
+ - magnet_clip_small（40）
+ - ring（40）
+全画像数: 200
